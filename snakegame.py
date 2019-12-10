@@ -116,10 +116,11 @@ class snake(object):
 
 
 def redrawWindow(surface):
-    global rows, width, s, snack
+    global rows, width, s, snack, power
     surface.fill((0,0,0))
     s.draw(surface)
     snack.draw(surface)
+    power.draw(surface)
 
     pygame.display.update()
 
@@ -151,12 +152,13 @@ def message_box(subject, content):
 
 
 def main():
-    global width, rows, s, snack
+    global width, rows, s, snack, power
     width = 500
     rows = 50
     win = pygame.display.set_mode((width, width))
     s = snake((255,0,0), (10,10))
     snack = cube(randomSnack(rows, s), color=(0,255,0))
+    power = cube(randomSnack(rows, s), color=(0,0,255))
     flag = True
 
     clock = pygame.time.Clock()
@@ -168,6 +170,10 @@ def main():
         if s.body[0].pos == snack.pos:
             s.addCube()
             snack = cube(randomSnack(rows, s), color=(0,255,0))
+        if s.body[0].pos == power.pos:
+            s.addCube()
+            s.addCube()
+            power = cube(randomSnack(rows, s), color=(0,0,255))
 
         for x in range(len(s.body)):
             if s.body[x].pos in list(map(lambda z:z.pos,s.body[x+1:])):
