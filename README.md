@@ -4,9 +4,11 @@ A Snake game, but also like TRON
 
 done:
   functional, single player snake game
-  
-to-do:
+  main menu
   add power ups
+
+to-do:
+  local multiplayer, up to two players
 
 future:
   add an AI snake
