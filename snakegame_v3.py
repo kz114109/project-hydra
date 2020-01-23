@@ -1,7 +1,16 @@
-import random
-import pygame
+import random, pygame
 import tkinter as tk
 from tkinter import messagebox
+
+pygame.init()
+
+def text_format(message, textFont, textSize, textColor):
+    newFont=pygame.font.Font(textFont, textSize)
+    newText=newFont.render(message, 0, textColor)
+ 
+    return newText
+
+font = "Retro.ttf"
 
 class cube(object):
     rows = 50
@@ -37,7 +46,7 @@ class snake(object):
         self.body.append(self.head)
         self.dirnx = 0
         self.dirny = 1
-
+        
     def move(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -116,11 +125,12 @@ class snake(object):
 
 
 def redrawWindow(surface):
-    global rows, width, s, snack, power
+    global width, rows, s, food, extra, zoom
     surface.fill((0,0,0))
     s.draw(surface)
-    snack.draw(surface)
-    power.draw(surface)
+    food.draw(surface)
+    extra.draw(surface)
+    zoom.draw(surface)
 
     pygame.display.update()
 
@@ -151,38 +161,119 @@ def message_box(subject, content):
         pass
 
 
-def main():
-    global width, rows, s, snack, power
+def game():
+    global width, rows, s, food, extra, zoom
     width = 500
     rows = 50
     win = pygame.display.set_mode((width, width))
+    pygame.display.set_caption("Project Hydra | Singleplayer")
     s = snake((255,0,0), (10,10))
-    snack = cube(randomSnack(rows, s), color=(0,255,0))
-    power = cube(randomSnack(rows, s), color=(0,0,255))
-    flag = True
+    food = cube(randomSnack(rows, s), color=(0,255,0))
+    extra = cube((-1,-1), color=(0,0,255))
+    zoom = cube((-1,-1), color=(255,255,255))
 
+
+    
+    flag = True
+    speedtime = 0
     clock = pygame.time.Clock()
+    speed = 10
     
     while flag:
         pygame.time.delay(50)
-        clock.tick(10)
+        clock.tick(speed)
+        speed = 10
         s.move()
-        if s.body[0].pos == snack.pos:
+        if s.body[0].pos == food.pos:
             s.addCube()
-            snack = cube(randomSnack(rows, s), color=(0,255,0))
-        if s.body[0].pos == power.pos:
+            food = cube(randomSnack(rows, s), color=(0,255,0))
+            if random.randint(1,6) == 6:
+                extra = cube(randomSnack(rows, s), color=(0,0,255))
+            if random. randint(1,10) == 10:
+                zoom = cube(randomSnack(rows, s), color=(255,255,255))
+        if s.body[0].pos == extra.pos:
             s.addCube()
             s.addCube()
-            power = cube(randomSnack(rows, s), color=(0,0,255))
-
+            s.addCube()
+            extra = cube((-1,-1), color=(0,0,255))
+        if s.body[0].pos == zoom.pos:
+            speedtime = 50
+            zoom = cube((-1,-1), color=(255,255,255))
+        if speedtime > 0:
+            speed = 50
+            speedtime -= 1
+        redrawWindow(win)
         for x in range(len(s.body)):
             if s.body[x].pos in list(map(lambda z:z.pos,s.body[x+1:])):
                 print('Score: ', len(s.body))
-                message_box('You Lost!', 'Play again...')
-                s.reset((10,10))
-                break
+                message_box('You died!', 'Back to main menu.')
+                flag = False
+    s.body.clear()
+    main_menu()
 
-            
-        redrawWindow(win)
+def main_menu():
+    global font
+    width = 500
+    screen = pygame.display.set_mode((width, width))
+    menu=True
+    selected="single"
+ 
+    clock = pygame.time.Clock()
+    while menu:
+        for event in pygame.event.get():
+            if event.type==pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type==pygame.KEYDOWN:
+                if event.key==pygame.K_UP and (selected == "multi" or selected == "single"):
+                    selected = "single"
+                elif event.key==pygame.K_DOWN and selected == "single":
+                    selected = "multi"
+                elif event.key==pygame.K_DOWN and selected == "multi":
+                    selected = "quit"
+                elif event.key==pygame.K_UP and selected == "quit":
+                    selected = "multi"
+                if event.key==pygame.K_RETURN:
+                    if selected == "single":
+                        game()
+                    if selected == "multi":
+                        print("Not available yet")
+                    if selected == "quit":
+                        pygame.quit()
+                        quit()
+ 
+        # Main Menu UI
+        screen.fill((0,0,0))
+        title=text_format("Project Hydra", font, 90, (255,255,0))
+        if selected =="single":
+            text_0 = text_format("Singleplayer", font, 75, (255,255,255))
+        else:
+            text_0 = text_format("Singleplayer", font, 75, (120,120,120))
+        
+        if selected == "multi":
+            text_1 = text_format("Multiplayer", font, 75, (255,255,255))
+        else:
+            text_1 = text_format("Multiplayer", font, 75, (120,120,120))
+        
+        if selected =="quit":
+            text_2 = text_format("QUIT", font, 75, (255,255,255))
+        else:
+            text_2 = text_format("QUIT", font, 75, (120,120,120))
+ 
+        title_rect = title.get_rect()
+        single_rect = text_0.get_rect()
+        multi_rect = text_1.get_rect()
+        quit_rect = text_2.get_rect()
+ 
+        # Main Menu Text
+        screen.blit(title, (width/2 - (title_rect[2]/2), 80))
+        screen.blit(text_0, (width/2 - (single_rect[2]/2), 300))
+        screen.blit(text_1, (width/2 - (multi_rect[2]/2), 360))
+        screen.blit(text_2, (width/2 - (quit_rect[2]/2), 420))
+        pygame.display.update()
+        clock.tick(10)
+        pygame.display.set_caption("Project Hydra | Main Menu")
 
-main()
+main_menu()
+pygame.quit()
+quit()
