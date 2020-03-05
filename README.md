@@ -1,4 +1,4 @@
-# project-hydra
+# project-ouroboros
 
 A Snake game, but also like TRON
 
